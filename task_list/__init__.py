@@ -11,9 +11,12 @@ from src.client import client, loop
 
 def run_client():
     if not os.path.isfile('running.pepega'):
+        print('run pepega')
         os.system('touch running.pepega')
         loop.create_task(client.start(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot))
         Thread(target=loop.run_forever()).start()
+    else:
+        print('pepega exists')
 
 
 def create_app():
