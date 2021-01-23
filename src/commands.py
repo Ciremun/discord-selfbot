@@ -1,5 +1,5 @@
 import discord 
-from os import _exit
+from os import _exit, system
 
 commands = {}
 
@@ -18,5 +18,5 @@ async def avatar_command(message: discord.Message):
     
 @command(name='exit')
 async def exit_command(*args, **kwargs):
-    os.system('rm running.pepega')
+    system('rm running.pepega')
     _exit(0)
