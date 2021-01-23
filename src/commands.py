@@ -1,4 +1,5 @@
 import discord 
+from .client import client
 
 commands = {}
 
@@ -14,3 +15,10 @@ def command(*, name: str):
 async def avatar_command(message: discord.Message):
     for user in message.mentions:
         await message.channel.send(user.avatar_url)
+    for user_id in message.content.split(' ')[1:]:
+        try:
+            user_id = int(user_id)
+        except Exception:
+            continue
+        if user := client.get_user(user_id):
+            await message.channel.send(user.avatar_url)
