@@ -1,14 +1,10 @@
-import asyncio
 import discord
 
 import src.config as cfg
 import src.commands as c
 from .log import logger
 
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-
-client = discord.Client(loop=loop)
+client = discord.Client()
 
 
 @client.event
