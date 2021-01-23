@@ -5,15 +5,13 @@ from flask import Flask
 def main():
     import os
     from os.path import join, dirname
-    from dotenv import load_dotenv
 
     import src.config
     import src.commands
-    from src.client import client
+    from src.client import client, loop
 
-    load_dotenv(join(dirname(__file__), '.env'))
-
-    client.run(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot)
+    loop.create_task(client.start(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot))
+    Thread(target=loop.run_forever()).start()
 
 def create_app():
     app = Flask(__name__)
@@ -22,7 +20,6 @@ def create_app():
 
     app.register_blueprint(task_list.bp)
 
-    selfbot_thread = Thread(target=main, daemon=True)
-    selfbot_thread.start()
+    Thread(target=main, daemon=True).start()
 
     return app
