@@ -1,4 +1,5 @@
 import discord 
+from os import _exit
 
 commands = {}
 
@@ -14,3 +15,8 @@ def command(*, name: str):
 async def avatar_command(message: discord.Message):
     for user in message.mentions:
         await message.channel.send(user.avatar_url)
+    
+@command(name='exit')
+async def exit_command(*args, **kwargs):
+    os.system('rm running.pepega')
+    _exit(0)

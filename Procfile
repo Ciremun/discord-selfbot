@@ -1,1 +1,1 @@
-web: gunicorn task_list:'create_app() --workers=1'
+web: gunicorn task_list:'create_app()'
