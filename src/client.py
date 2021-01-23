@@ -10,9 +10,11 @@ asyncio.set_event_loop(loop)
 
 client = discord.Client(loop=loop)
 
+
 @client.event
 async def on_ready(*args, **kwargs):
     print('ready')
+
 
 @client.event
 async def on_message(message: discord.Message):

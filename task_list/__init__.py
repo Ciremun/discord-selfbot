@@ -1,17 +1,20 @@
 from threading import Thread
+import os
+from os.path import join, dirname
 
 from flask import Flask
 
-def main():
-    import os
-    from os.path import join, dirname
+import src.config
+import src.commands
+from src.client import client, loop
 
-    import src.config
-    import src.commands
-    from src.client import client, loop
 
-    loop.create_task(client.start(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot))
+def run_client():
+
+    loop.create_task(client.start(os.environ.get(
+        'DISCORD_TOKEN'), bot=src.config.bot))
     Thread(target=loop.run_forever()).start()
+
 
 def create_app():
     app = Flask(__name__)
@@ -20,6 +23,6 @@ def create_app():
 
     app.register_blueprint(task_list.bp)
 
-    Thread(target=main, daemon=True).start()
+    run_client()
 
     return app

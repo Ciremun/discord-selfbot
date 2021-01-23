@@ -1,7 +1,8 @@
-from flask import Blueprint, Response
+from flask import Blueprint
 
 bp = Blueprint('task_list', __name__)
 
+
 @bp.route('/')
 def index():
-    return Response(200)
+    return 'this app wuns my <a href="https://github.com/Ciremun/discord-selfbot" style="color: #ff69b4">discowd sewfbot</a> owo'
