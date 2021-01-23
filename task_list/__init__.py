@@ -3,6 +3,9 @@ from threading import Thread
 
 from flask import Flask
 
+async def run_client(loop):
+    client.run(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot, loop=loop)
+
 def main():
     import os
     from os.path import join, dirname
@@ -17,7 +20,7 @@ def main():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    client.run(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot, loop=loop)
+    loop.run_until_complete(run_client(loop))
 
 def create_app():
     app = Flask(__name__)
