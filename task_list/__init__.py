@@ -10,9 +10,7 @@ from src.client import client, loop
 
 
 def run_client():
-
-    loop.create_task(client.start(os.environ.get(
-        'DISCORD_TOKEN'), bot=src.config.bot))
+    loop.create_task(client.start(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot))
     Thread(target=loop.run_forever()).start()
 
 
