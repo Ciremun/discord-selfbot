@@ -1,10 +1,6 @@
-import asyncio
 from threading import Thread
 
 from flask import Flask
-
-async def run_client(loop):
-    client.run(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot, loop=loop)
 
 def main():
     import os
@@ -17,10 +13,7 @@ def main():
 
     load_dotenv(join(dirname(__file__), '.env'))
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    loop.run_until_complete(run_client(loop))
+    client.run(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot)
 
 def create_app():
     app = Flask(__name__)
