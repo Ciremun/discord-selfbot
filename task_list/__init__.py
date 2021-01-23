@@ -1,3 +1,5 @@
+from threading import Thread
+
 from flask import Flask
 
 def main():
@@ -19,5 +21,8 @@ def create_app():
     from . import task_list
 
     app.register_blueprint(task_list.bp)
+
+    selfbot_thread = Thread(target=main, daemon=True)
+    selfbot_thread.start()
 
     return app
