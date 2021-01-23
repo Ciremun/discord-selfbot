@@ -15,6 +15,7 @@ def main():
     load_dotenv(join(dirname(__file__), '.env'))
 
     loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
     client.run(os.environ.get('DISCORD_TOKEN'), bot=src.config.bot, loop=loop)
 
