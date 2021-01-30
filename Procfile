@@ -1,1 +1,0 @@
-web: gunicorn task_list:'create_app()' & python main.py & python ping_self_because_heroku_sucks.py

@@ -6,6 +6,7 @@ from .utils import send_error
 from .client import client
 
 discord_emoji_re = re.compile(r'<a?:(\w+|\d+):(\d{18})>')
+size_re = re.compile(r'size=(\d+)')
 commands = {}
 
 def command(*, name: str):
