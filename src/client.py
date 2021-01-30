@@ -9,7 +9,7 @@ client = discord.Client()
 
 @client.event
 async def on_ready(*args, **kwargs):
-    print('pepega is running')
+    print('ᕕ Pepega ᕗ')
 
 
 @client.event
