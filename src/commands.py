@@ -33,16 +33,17 @@ async def avatar_command(message: discord.Message):
         if size:
             avatar_url = re.sub(size_re, f'size={size}', avatar_url)
         await message.channel.send(avatar_url)
-    for user in message.mentions + message_split:
-        if isinstance(user, discord.abc.User):
-            await send_avatar(user.avatar_url)
-            continue
+    for user in message.mentions:
+        await send_avatar(user.avatar_url)
+    for user_id in message_split:
         try:
-            user_id = int(user)
+            user_id = int(user_id)
         except Exception:
             continue
         if user := client.get_user(user_id):
             await send_avatar(user.avatar_url)
+        else:
+            await send_error(f'id {user_id} not found', message, delay=3)
 
 @command(name='exec')
 async def exec_command(message: discord.Message):
