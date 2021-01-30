@@ -23,15 +23,26 @@ def command(*, name: str):
 
 @command(name='avatar')
 async def avatar_command(message: discord.Message):
-    for user in message.mentions:
-        await message.channel.send(user.avatar_url)
-    for user_id in message.content.split(' ')[1:]:
+    message_split = message.content.split(' ')[1:]
+    size = None
+    for part in message_split:
+        if match := re.match(size_re, part):
+            size = match.group(1)
+    async def send_avatar(avatar_url: discord.Asset):
+        avatar_url = str(avatar_url)
+        if size:
+            avatar_url = re.sub(size_re, f'size={size}', avatar_url)
+        await message.channel.send(avatar_url)
+    for user in message.mentions + message_split:
+        if isinstance(user, discord.abc.User):
+            await send_avatar(user.avatar_url)
+            continue
         try:
-            user_id = int(user_id)
+            user_id = int(user)
         except Exception:
             continue
         if user := client.get_user(user_id):
-            await message.channel.send(user.avatar_url)
+            await send_avatar(user.avatar_url)
 
 @command(name='exec')
 async def exec_command(message: discord.Message):
