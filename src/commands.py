@@ -87,3 +87,11 @@ async def wrap_command(message: discord.Message) -> str:
 @command(name='eval')
 async def eval_command(message):
     return eval(" ".join(message.content.split(' ')[1:]))
+
+@command(name='replace')
+async def replace_command(message):
+    parts = message.content.split(' ')
+    pattern = parts[1]
+    repl = parts[2]
+    here = " ".join(parts[3:])
+    return re.sub(pattern, repl, here)
