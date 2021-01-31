@@ -1,5 +1,6 @@
 import re
 import io
+from typing import Optional
 
 import discord
 import requests
@@ -17,35 +18,39 @@ def command(*, name: str):
     def decorator(func):
         async def wrapper(message: discord.Message):
             try:
-                await func(message)
+                return await func(message)
             except Exception as e:
                 await send_error(f'error: {e}', message, delay=3)
-            await message.delete()
+            finally:
+                try:
+                    await message.delete()
+                except discord.NotFound:
+                    pass
         commands[name] = wrapper
         return wrapper
     return decorator
 
 @command(name='avatar')
-async def avatar_command(message: discord.Message):
+async def avatar_command(message: discord.Message) -> Optional[str]:
     message_split = message.content.split(' ')[1:]
     size = None
     for part in message_split:
         if match := re.match(size_re, part):
             size = match.group(1)
-    async def send_avatar(avatar_url: discord.Asset):
+    async def send_avatar(avatar_url: discord.Asset) -> str:
         avatar_url = str(avatar_url)
         if size:
             avatar_url = re.sub(size_re, f'size={size}', avatar_url)
-        await message.channel.send(avatar_url)
+        return avatar_url
     for user in message.mentions:
-        await send_avatar(user.avatar_url)
+        return await send_avatar(user.avatar_url)
     for user_id in message_split:
         try:
             user_id = int(user_id)
         except Exception:
             continue
         if user := client.get_user(user_id):
-            await send_avatar(user.avatar_url)
+            return await send_avatar(user.avatar_url)
         else:
             await send_error(f'id {user_id} not found', message, delay=3)
 
@@ -56,17 +61,17 @@ async def exec_command(message: discord.Message):
         exec(code)
 
 @command(name='emoji')
-async def emoji_command(message: discord.Message):
+async def emoji_command(message: discord.Message) -> Optional[str]:
     message_split = message.content.split(' ')
     emoji_name = message_split[1]
-    async def send_emoji_link(emoji: discord.Emoji):
+    async def send_emoji_link(emoji: discord.Emoji) -> str:
         size = '' if len(message_split) < 3 else f'?size={message_split[2]}'
-        await message.channel.send(f'{emoji.url}{size}')
+        return f'{emoji.url}{size}'
     if emoji_id := re.search(discord_emoji_re, emoji_name):
         if emoji := client.get_emoji(int(emoji_id.group(2))):
-            await send_emoji_link(emoji)
+            return await send_emoji_link(emoji)
     elif emoji := discord.utils.get(client.emojis, name=emoji_name):
-        await send_emoji_link(emoji)
+        return await send_emoji_link(emoji)
     else:
         if re.match(unusual_char_re, emoji_name):
             for emoji in unicode_emojis:
@@ -76,3 +81,10 @@ async def emoji_command(message: discord.Message):
                     await message.channel.send(file=discord.File(fp=io.BytesIO(png), filename='image.png'))
                     return
         await send_error(f'emoji {emoji_name} not found', message, delay=3)
+
+@command(name='wrap')
+async def wrap_command(message: discord.Message) -> str:
+    message_split = message.content.split(" ")
+    wrap_chars = message_split[1]
+    inside = " ".join(message_split[2:])
+    return f'{wrap_chars}{inside}{wrap_chars[::-1]}'
