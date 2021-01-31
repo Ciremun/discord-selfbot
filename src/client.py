@@ -32,3 +32,5 @@ async def on_message(message: discord.Message):
         except Exception as e:
             await send_error(f'error: {e}', message, delay=3)
             logger.exception(e)
+        finally:
+            await message.delete()

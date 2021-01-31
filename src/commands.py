@@ -21,11 +21,6 @@ def command(*, name: str):
                 return await func(message)
             except Exception as e:
                 await send_error(f'error: {e}', message, delay=3)
-            finally:
-                try:
-                    await message.delete()
-                except discord.NotFound:
-                    pass
         commands[name] = wrapper
         return wrapper
     return decorator
@@ -88,3 +83,7 @@ async def wrap_command(message: discord.Message) -> str:
     wrap_chars = message_split[1]
     inside = " ".join(message_split[2:])
     return f'{wrap_chars}{inside}{wrap_chars[::-1]}'
+
+@command(name='eval')
+async def eval_command(message):
+    return eval(" ".join(message.content.split(' ')[1:]))
