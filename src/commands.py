@@ -90,13 +90,26 @@ async def wrap_command(message: discord.Message) -> str:
     return f'{wrap_chars}{inside}{wrap_chars[::-1]}'
 
 @command(name='eval')
-async def eval_command(message):
+async def eval_command(message: discord.Message):
     return eval(" ".join(message.content.split(' ')[1:]))
 
 @command(name='replace')
-async def replace_command(message):
+async def replace_command(message: discord.Message) -> str:
     parts = message.content.split(' ')
     pattern = parts[1]
     repl = parts[2]
     here = " ".join(parts[3:])
     return re.sub(pattern, repl, here)
+
+@command(name='upload')
+async def upload(message: discord.Message):
+    parts = message.content.split(' ')
+    guild_name = parts[1]
+    guild = discord.utils.get(client.guilds, name=guild_name)
+    assert guild is not None
+    emoji_name = parts[2]
+    assert 2 <= len(emoji_name) <= 32
+    emoji_url = parts[3]
+    image = requests.get(emoji_url).content
+    await guild.create_custom_emoji(name=emoji_name, image=image)
+
