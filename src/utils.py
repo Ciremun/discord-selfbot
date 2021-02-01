@@ -16,3 +16,7 @@ def lookahead(iterable: Iterable):
         yield last, False
         last = val
     yield last, True
+
+def find_item(name: str, items: Iterable):
+    name = name.lower()
+    return discord.utils.find(lambda x: x.name.lower() == name, items)
