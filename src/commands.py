@@ -105,6 +105,7 @@ async def replace_command(message: discord.Message) -> str:
 async def upload(message: discord.Message):
     parts = message.content.split(' ')
     guild_name = parts[1]
+    # TODO: use discord.utils.find with guild_name.lower()
     guild = discord.utils.get(client.guilds, name=guild_name)
     assert guild is not None
     emoji_name = parts[2]
