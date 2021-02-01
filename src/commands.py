@@ -4,10 +4,15 @@ from typing import Optional
 
 import discord
 import requests
-import cairosvg
 
 from .utils import send_error, unicode_emojis
 from .client import client
+from .log import logger
+
+try:
+    import cairosvg
+except OSError as e:
+    logger.exception(e)
 
 discord_emoji_re = re.compile(r'<a?:(\w+|\d+):(\d{18})>')
 size_re = re.compile(r'size=(\d+)')

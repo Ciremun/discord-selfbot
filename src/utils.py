@@ -3,7 +3,7 @@ from typing import Optional, Iterable
 
 import discord
 
-unicode_emojis = json.load(open('emojis.json'))
+unicode_emojis = json.load(open('emojis.json', encoding='utf-8'))
 
 async def send_error(error_message: str, message: discord.Message, *, delay: Optional[float] = None):
     message = await message.channel.send(error_message)
