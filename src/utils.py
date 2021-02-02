@@ -5,7 +5,7 @@ import discord
 
 unicode_emojis = json.load(open('emojis.json', encoding='utf-8'))
 
-async def send_error(error_message: str, message: discord.Message, *, delay: Optional[float] = None):
+async def send_error(error_message: str, message: discord.Message, *, delay: Optional[float] = 3):
     message = await message.channel.send(error_message)
     await message.delete(delay=delay)
 
