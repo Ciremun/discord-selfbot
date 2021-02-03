@@ -1,6 +1,6 @@
 import re
 import io
-from typing import Optional
+from typing import Optional, Callable, Any
 
 import discord
 import requests
@@ -15,47 +15,53 @@ except OSError as e:
     logger.exception(e)
 
 discord_emoji_re = re.compile(r'<a?:(\w+|\d+):(\d{18})>')
-size_re = re.compile(r'size=(\d+)')
+discord_avatar_size_re = re.compile(r'size=\d{1,4}$')
+up_to_4_digits_re = re.compile(r'^\d{1,4}$')
 unusual_char_re = re.compile(r'[^\w\s,]')
 commands = {}
 
-def command(*, name: str):
-    def decorator(func):
-        async def wrapper(message: discord.Message):
+def command(*, name: str) -> Callable:
+    def decorator(func: Callable) -> Callable:
+        async def wrapper(message: discord.Message) -> Any:
             try:
                 return await func(message)
             except Exception as e:
                 await send_error(f'error: {e}', message)
+        wrapper.__name__ = func.__name__
         commands[name] = wrapper
         return wrapper
     return decorator
 
 @command(name='avatar')
-async def avatar_command(message: discord.Message) -> Optional[str]:
+async def avatar_command(message: discord.Message) -> str:
     message_split = message.content.split(' ')[1:]
     size = None
     for part in message_split:
-        if match := re.match(size_re, part):
-            size = match.group(1)
+        if match := re.match(up_to_4_digits_re, part):
+            size = match.group(0)
+            break
     async def send_avatar(avatar_url: discord.Asset) -> str:
         avatar_url = str(avatar_url)
         if size:
-            avatar_url = re.sub(size_re, f'size={size}', avatar_url)
+            avatar_url = re.sub(discord_avatar_size_re, f'size={size}', avatar_url)
         return avatar_url
+    urls = []
     for user in message.mentions:
-        return await send_avatar(user.avatar_url)
+        urls.append(await send_avatar(user.avatar_url))
     for user_id in message_split:
         try:
+            assert len(user_id) > 16
             user_id = int(user_id)
         except Exception:
             continue
         if user := client.get_user(user_id):
-            return await send_avatar(user.avatar_url)
+            urls.append(await send_avatar(user.avatar_url))
         else:
             await send_error(f'id {user_id} not found', message)
+    return ' '.join(urls)
 
 @command(name='exec')
-async def exec_command(message: discord.Message):
+async def exec_command(message: discord.Message) -> None:
     code = '\n'.join(message.content.split('\n')[2:])[:-3]
     if code:
         exec(code)
@@ -84,25 +90,25 @@ async def emoji_command(message: discord.Message) -> Optional[str]:
 
 @command(name='wrap')
 async def wrap_command(message: discord.Message) -> str:
-    message_split = message.content.split(" ")
+    message_split = message.content.split(' ')
     wrap_chars = message_split[1]
-    inside = " ".join(message_split[2:])
+    inside = ' '.join(message_split[2:])
     return f'{wrap_chars}{inside}{wrap_chars[::-1]}'
 
 @command(name='eval')
-async def eval_command(message: discord.Message):
-    return eval(" ".join(message.content.split(' ')[1:]))
+async def eval_command(message: discord.Message) -> Any:
+    return eval(' '.join(message.content.split(' ')[1:]))
 
 @command(name='replace')
 async def replace_command(message: discord.Message) -> str:
     parts = message.content.split(' ')
     pattern = parts[1]
     repl = parts[2]
-    here = " ".join(parts[3:])
+    here = ' '.join(parts[3:])
     return re.sub(pattern, repl, here)
 
 @command(name='upload')
-async def upload(message: discord.Message):
+async def upload_command(message: discord.Message) -> None:
     parts = message.content.split(' ')
     guild_name = parts[1]
     guild = find_item(guild_name, client.guilds)
@@ -112,4 +118,3 @@ async def upload(message: discord.Message):
     emoji_url = parts[3]
     image = requests.get(emoji_url).content
     await guild.create_custom_emoji(name=emoji_name, image=image)
-
