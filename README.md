@@ -25,3 +25,5 @@
 | `eval`    | `code string`                             | evaluate Python code                                    |
 | `replace` | `<regex target> <regex replace> <string>` | replace characters in string using regular expressions  |
 | `upload`  | `<guild name> <emoji name> <image url>`   | upload emoji via link                                   |
+
+pipe `|` is supported
