@@ -18,6 +18,7 @@ discord_emoji_re = re.compile(r'<a?:(\w+|\d+):(\d{18})>')
 discord_avatar_size_re = re.compile(r'size=\d{1,4}$')
 up_to_4_digits_re = re.compile(r'^\d{1,4}$')
 unusual_char_re = re.compile(r'[^\w\s,]')
+replace_re = re.compile(r'^[\"\']([^\"\']+)[\"\'] [\"\']([^\"\']+)[\"\'] (.*)$')
 commands = {}
 
 def command(*, name: str) -> Callable:
@@ -101,11 +102,15 @@ async def eval_command(message: discord.Message) -> Any:
 
 @command(name='replace')
 async def replace_command(message: discord.Message) -> str:
-    # TODO: use eval() for regular expressions
-    parts = message.content.split(' ')
-    pattern = parts[1]
-    repl = parts[2]
-    here = ' '.join(parts[3:])
+    if match := re.match(replace_re, ' '.join(message.content.split(' ')[1:])):
+        pattern = match.group(1)
+        repl = match.group(2)
+        here = match.group(3)
+    else:
+        parts = message.content.split(' ')
+        pattern = parts[1]
+        repl = parts[2]
+        here = ' '.join(parts[3:])
     return re.sub(pattern, repl, here)
 
 @command(name='upload')
