@@ -101,6 +101,7 @@ async def eval_command(message: discord.Message) -> Any:
 
 @command(name='replace')
 async def replace_command(message: discord.Message) -> str:
+    # TODO: use eval() for regular expressions
     parts = message.content.split(' ')
     pattern = parts[1]
     repl = parts[2]
