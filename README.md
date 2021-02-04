@@ -1,12 +1,16 @@
 # discord-selfbot
 
-## env
+## Install
+
+[Python 3](https://www.python.org/)
+
+### env
 
 |      Key        | Type  |                Value                     |
 |-----------------|-------|------------------------------------------|
 | `DISCORD_TOKEN` | `str` | discord authentication token (no prefix) |
 
-## config.py
+### config.py
 
 |     Var       |  Type  |          Description           |
 |---------------|--------|--------------------------------|
