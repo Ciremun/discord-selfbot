@@ -126,3 +126,4 @@ async def upload_command(message: discord.Message) -> None:
     await guild.create_custom_emoji(name=emoji_name, image=image)
 
 # TODO(#5): remindme command
+# TODO(#6): weather command
