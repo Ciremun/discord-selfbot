@@ -6,6 +6,8 @@ from typing import Optional, Callable, Any
 import discord
 import requests
 
+import src.config as cfg
+
 from .utils import (
     send_error,
     unicode_emojis,
@@ -138,8 +140,13 @@ async def remind_command(message: discord.Message) -> str:
     note = ' '.join(parts[2:])
     async def reminder(remind_in: int, note: str) -> None:
         await asyncio.sleep(remind_in)
-        reminder_message = await message.channel.send(f'{message.author.mention}, {note}')
-        await reminder_message.delete(delay=60)
+        await message.channel.send(f'{message.author.mention}, {note}')
     client.loop.create_task(reminder(remind_in, note))
 
-# TODO(#6): weather command
+@command(name='weather')
+async def weather_command(message: discord.Message) -> str:
+    parts = message.content.split(' ')
+    location = ' '.join(parts[1:])
+    url = cfg.weather_command_url.replace('%s', location)
+    result = requests.get(url)
+    return result.text
