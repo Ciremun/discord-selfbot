@@ -131,8 +131,6 @@ async def upload_command(message: discord.Message) -> None:
     image = requests.get(emoji_url).content
     await guild.create_custom_emoji(name=emoji_name, image=image)
 
-# TODO(#5): remindme command
-
 @command(name='remind')
 async def remind_command(message: discord.Message) -> str:
     parts = message.content.split(' ')
