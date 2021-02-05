@@ -73,6 +73,10 @@ async def exec_command(message: discord.Message) -> None:
     if code:
         exec(code)
 
+@command(name='eval')
+async def eval_command(message: discord.Message) -> Any:
+    return eval('\n'.join(message.content.split('\n')[2:])[:-3])
+
 @command(name='emoji')
 async def emoji_command(message: discord.Message) -> Optional[str]:
     message_split = message.content.split(' ')
@@ -101,10 +105,6 @@ async def wrap_command(message: discord.Message) -> str:
     wrap_chars = message_split[1]
     inside = ' '.join(message_split[2:])
     return f'{wrap_chars}{inside}{wrap_chars[::-1]}'
-
-@command(name='eval')
-async def eval_command(message: discord.Message) -> Any:
-    return eval(' '.join(message.content.split(' ')[1:]))
 
 @command(name='replace')
 async def replace_command(message: discord.Message) -> str:
