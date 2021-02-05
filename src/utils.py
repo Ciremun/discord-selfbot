@@ -20,3 +20,15 @@ def lookahead(iterable: Iterable):
 def find_item(name: str, items: Iterable):
     name = name.lower()
     return discord.utils.find(lambda x: x.name.lower() == name, items)
+
+def timecode_convert(timecode: str) -> int:
+    """Get Seconds from timecode."""
+    timecode = timecode.split(':')
+    if len(timecode) == 1:
+        return int(timecode[0])
+    elif len(timecode) == 2:
+        m, s = timecode[0], timecode[1]
+        return int(m) * 60 + int(s)
+    elif len(timecode) == 3:
+        h, m, s = timecode[0], timecode[1], timecode[2]
+        return int(h) * 3600 + int(m) * 60 + int(s)

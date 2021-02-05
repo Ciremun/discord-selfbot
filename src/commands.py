@@ -1,3 +1,4 @@
+import asyncio
 import re
 import io
 from typing import Optional, Callable, Any
@@ -5,7 +6,12 @@ from typing import Optional, Callable, Any
 import discord
 import requests
 
-from .utils import send_error, unicode_emojis, find_item
+from .utils import (
+    send_error,
+    unicode_emojis,
+    find_item,
+    timecode_convert
+)
 from .client import client
 from .log import logger
 
@@ -126,4 +132,16 @@ async def upload_command(message: discord.Message) -> None:
     await guild.create_custom_emoji(name=emoji_name, image=image)
 
 # TODO(#5): remindme command
+
+@command(name='remind')
+async def remind_command(message: discord.Message) -> str:
+    parts = message.content.split(' ')
+    remind_in = timecode_convert(parts[1])
+    note = ' '.join(parts[2:])
+    async def reminder(remind_in: int, note: str) -> None:
+        await asyncio.sleep(remind_in)
+        reminder_message = await message.channel.send(f'{message.author.mention}, {note}')
+        await reminder_message.delete(delay=60)
+    client.loop.create_task(reminder(remind_in, note))
+
 # TODO(#6): weather command
