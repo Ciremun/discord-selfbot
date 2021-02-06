@@ -1,7 +1,7 @@
 import asyncio
 import re
 import io
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, Pattern
 
 import discord
 import requests
@@ -27,6 +27,7 @@ discord_avatar_size_re = re.compile(r'size=\d{1,4}$')
 up_to_4_digits_re = re.compile(r'^\d{1,4}$')
 unusual_char_re = re.compile(r'[^\w\s,]')
 replace_re = re.compile(r'^[\"\']([^\"\']+)[\"\'] [\"\']([^\"\']+)[\"\'] (.*)$')
+echo_re = re.compile(r'^[\"\']([^\"\']+)[\"\'] (.*)$')
 commands = {}
 
 def command(*, name: str) -> Callable:
@@ -150,3 +151,14 @@ async def weather_command(message: discord.Message) -> str:
     url = cfg.weather_command_url.replace('%s', location)
     result = requests.get(url)
     return result.text
+
+@command(name='echo')
+async def echo_command(message: discord.Message) -> str:
+    parts = message.content.split(' ')
+    args = ' '.join(parts[1:])
+    if match := re.match(echo_re, args):
+        result = match.group(1)
+        repl = match.group(2)
+        return result.replace('%s', repl)
+    else:
+        return args
