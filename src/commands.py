@@ -18,6 +18,7 @@ from .utils import (
 from .client import client
 from .log import logger
 
+# TODO(#8): replace cairosvg
 try:
     import cairosvg
 except OSError as e:
