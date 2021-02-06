@@ -165,7 +165,7 @@ async def echo_command(message: discord.Message) -> str:
         return args
 
 @command(name='loop')
-async def loop_command(message: discord.Message) -> Any:
+async def loop_command(message: discord.Message) -> None:
     parts = message.content.split(' ')
     cmd = parts[2]
     times = parts[1]
