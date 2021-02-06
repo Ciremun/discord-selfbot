@@ -30,6 +30,7 @@
 | `replace` | `<regex target> <regex replace> <string>` | replace characters in string using regular expressions                         |
 | `upload`  | `<guild name> <emoji name> <image url>`   | upload emoji via link                                                          |
 | `remind`  | `<timecode> <note>`                       | notify self with message `note` in time `timecode`                             |
+| `weather` | `<location>`                              | get weather data for location                                                  |
 | `echo`    | `<message["'%s]> [repl %s with]`          | return [formatted] message, formatted message regex: `^["']([^"']+)["'] (.*)$` |
 
 pipe `|` is supported
