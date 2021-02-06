@@ -162,3 +162,5 @@ async def echo_command(message: discord.Message) -> str:
         return result.replace('%s', repl)
     else:
         return args
+
+# TODO(#7): loop command
