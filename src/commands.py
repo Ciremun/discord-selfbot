@@ -7,6 +7,7 @@ import discord
 import requests
 
 import src.config as cfg
+from .client import on_message
 
 from .utils import (
     send_error,
@@ -163,4 +164,12 @@ async def echo_command(message: discord.Message) -> str:
     else:
         return args
 
-# TODO(#7): loop command
+@command(name='loop')
+async def loop_command(message: discord.Message) -> Any:
+    parts = message.content.split(' ')
+    cmd = parts[2]
+    times = parts[1]
+    args = ' '.join(parts[3:])
+    message.content = f'{cfg.prefix}{cmd} {args}'
+    for _ in range(int(times)):
+        await on_message(message)

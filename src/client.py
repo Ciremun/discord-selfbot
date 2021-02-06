@@ -33,4 +33,7 @@ async def on_message(message: discord.Message):
             await send_error(f'error: {e}', message)
             logger.exception(e)
         finally:
-            await message.delete()
+            try:
+                await message.delete()
+            except discord.errors.NotFound:
+                pass
