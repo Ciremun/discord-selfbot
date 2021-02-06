@@ -77,7 +77,7 @@ async def exec_command(message: discord.Message) -> None:
 
 @command(name='eval')
 async def eval_command(message: discord.Message) -> Any:
-    return eval('\n'.join(message.content.split('\n')[2:])[:-3])
+    return eval(' '.join(message.content.split(' ')[1:]))
 
 @command(name='emoji')
 async def emoji_command(message: discord.Message) -> Optional[str]:
