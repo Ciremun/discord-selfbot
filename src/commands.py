@@ -99,8 +99,8 @@ async def emoji_command(message: discord.Message) -> Optional[str]:
                 if emoji['emoji'] == emoji_name:
                     svg = requests.get(emoji['svg']).content
                     png = cairosvg.svg2png(svg)
-                    await message.channel.send(file=discord.File(fp=io.BytesIO(png), filename='image.png'))
-                    return
+                    emoji_msg = await message.channel.send(file=discord.File(fp=io.BytesIO(png), filename='image.png'))
+                    return emoji_msg.attachments[0].url
         await send_error(f'emoji {emoji_name} not found', message)
 
 @command(name='wrap')
