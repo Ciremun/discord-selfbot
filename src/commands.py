@@ -1,7 +1,6 @@
 import asyncio
 import re
-import io
-from typing import Optional, Callable, Any, Pattern
+from typing import Optional, Callable, Any
 
 import discord
 import requests
@@ -11,18 +10,11 @@ from .client import on_message
 
 from .utils import (
     send_error,
-    unicode_emojis,
     find_item,
+    unicode_emojis,
     timecode_convert
 )
 from .client import client
-from .log import logger
-
-# TODO(#8): replace cairosvg
-try:
-    import cairosvg
-except OSError as e:
-    logger.exception(e)
 
 discord_emoji_re = re.compile(r'<a?:(\w+|\d+):(\d{18})>')
 discord_avatar_size_re = re.compile(r'size=\d{1,4}$')
@@ -98,10 +90,7 @@ async def emoji_command(message: discord.Message) -> Optional[str]:
         if re.match(unusual_char_re, emoji_name):
             for emoji in unicode_emojis:
                 if emoji['emoji'] == emoji_name:
-                    svg = requests.get(emoji['svg']).content
-                    png = cairosvg.svg2png(svg)
-                    emoji_msg = await message.channel.send(file=discord.File(fp=io.BytesIO(png), filename='image.png'))
-                    return emoji_msg.attachments[0].url
+                    return emoji['svg']
         await send_error(f'emoji {emoji_name} not found', message)
 
 @command(name='wrap')

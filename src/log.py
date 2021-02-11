@@ -6,8 +6,6 @@ import traceback
 import threading
 import sys
 
-import src.config as cfg
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 Path("log/").mkdir(exist_ok=True)
