@@ -6,9 +6,9 @@
 
 ### env
 
-|      Key        | Type  |                Value                     |
-|-----------------|-------|------------------------------------------|
-| `DISCORD_TOKEN` | `str` | discord authentication token (no prefix) |
+|      Key                | Type  |                Value                     |
+|-------------------------|-------|------------------------------------------|
+| `DISCORD_SELFBOT_TOKEN` | `str` | discord authentication token (no prefix) |
 
 ### config.py
 
