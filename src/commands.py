@@ -12,7 +12,8 @@ from .utils import (
     send_error,
     find_item,
     unicode_emojis,
-    timecode_convert
+    timecode_convert,
+    usage
 )
 from .client import client
 
@@ -163,3 +164,12 @@ async def loop_command(message: discord.Message) -> None:
     message.content = f'{cfg.prefix}{cmd} {args}'
     for _ in range(int(times)):
         await on_message(message)
+
+@command(name='help')
+async def help_command(message: discord.Message) -> None:
+    parts = message.content.split(' ')
+    cmd = parts[1]
+    help_message = usage.get(cmd)
+    if not help_message:
+        raise KeyError(f"help for command `{cmd}` doesn't exist")
+    await message.channel.send(help_message)
