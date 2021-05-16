@@ -168,7 +168,11 @@ async def loop_command(message: discord.Message) -> None:
 @command(name='help')
 async def help_command(message: discord.Message) -> None:
     parts = message.content.split(' ')
-    cmd = parts[1]
+    try:
+        cmd = parts[1]
+    except IndexError:
+        await message.channel.send(f'commands: {", ".join(list(commands.keys()))}')
+        return
     help_message = usage.get(cmd)
     if not help_message:
         raise KeyError(f"help for command `{cmd}` doesn't exist")
