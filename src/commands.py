@@ -172,4 +172,4 @@ async def help_command(message: discord.Message) -> None:
     help_message = usage.get(cmd)
     if not help_message:
         raise KeyError(f"help for command `{cmd}` doesn't exist")
-    await message.channel.send(help_message)
+    await message.channel.send(f'{cmd}: {help_message}')
