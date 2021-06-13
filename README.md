@@ -10,7 +10,7 @@
 |--------------------------|-------|----------------------------------------------------------|
 | `DISCORD_SELFBOT_TOKENS` | `str` | discord authentication tokens (no prefix, separator=`;`) |
 
-### `Client` class options
+### Client class options
 
 |     Var       |  Type  |          Description           |
 |---------------|--------|--------------------------------|
