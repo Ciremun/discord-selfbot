@@ -10,12 +10,11 @@
 |--------------------------|-------|----------------------------------------------------------|
 | `DISCORD_SELFBOT_TOKENS` | `str` | discord authentication tokens (no prefix, separator=`;`) |
 
-### config.py
+### `Client` class options
 
 |     Var       |  Type  |          Description           |
 |---------------|--------|--------------------------------|
 | `prefix`      | `str`  | bot command prefix             |
-| `bot`         | `bool` | user or bot token?             |
 | `check_self`  | `bool` | can other users run commands?  |
 
 ## commands
