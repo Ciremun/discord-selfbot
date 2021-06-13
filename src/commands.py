@@ -1,9 +1,11 @@
 import asyncio
 import re
+import io
 from typing import Optional, Callable, Any
 
 import discord
 import requests
+from PIL import Image
 
 import src.config as cfg
 from .client import on_message
@@ -13,7 +15,10 @@ from .utils import (
     find_item,
     unicode_emojis,
     timecode_convert,
-    usage
+    usage,
+    hex3_to_hex6,
+    hex_to_rgb,
+    rgb_to_hex
 )
 from .client import client
 
@@ -21,9 +26,16 @@ discord_emoji_re = re.compile(r'<a?:(\w+|\d+):(\d{18})>')
 discord_avatar_size_re = re.compile(r'size=\d{1,4}$')
 up_to_4_digits_re = re.compile(r'^\d{1,4}$')
 unusual_char_re = re.compile(r'[^\w\s,]')
-replace_re = re.compile(r'^[\"\']([^\"\']+)[\"\'] [\"\']([^\"\']+)[\"\'] (.*)$')
+replace_re = re.compile(
+    r'^[\"\']([^\"\']+)[\"\'] [\"\']([^\"\']+)[\"\'] (.*)$')
 echo_re = re.compile(r'^[\"\']([^\"\']+)[\"\'] (.*)$')
+hex_color_regex = re.compile(r'^#([A-Fa-f0-9]{6})$')
+hex3_color_regex = re.compile(r'^#([A-Fa-f0-9]{3})$')
+rgb_regex = re.compile(r'^(?:(?:^|,?\s*)([01]?\d\d?|2[0-4]\d|25[0-5])){3}$')
+rgb_hex_regex = re.compile(
+    r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^(?:(?:^|,?\s*)([01]?\d\d?|2[0-4]\d|25[0-5])){3}$')
 commands = {}
+
 
 def command(*, name: str) -> Callable:
     def decorator(func: Callable) -> Callable:
@@ -37,6 +49,7 @@ def command(*, name: str) -> Callable:
         return wrapper
     return decorator
 
+
 @command(name='avatar')
 async def avatar_command(message: discord.Message) -> str:
     message_split = message.content.split(' ')[1:]
@@ -45,10 +58,12 @@ async def avatar_command(message: discord.Message) -> str:
         if match := re.match(up_to_4_digits_re, part):
             size = match.group(0)
             break
+
     async def send_avatar(avatar_url: discord.Asset) -> str:
         avatar_url = str(avatar_url)
         if size:
-            avatar_url = re.sub(discord_avatar_size_re, f'size={size}', avatar_url)
+            avatar_url = re.sub(discord_avatar_size_re,
+                                f'size={size}', avatar_url)
         return avatar_url
     urls = []
     for user in message.mentions:
@@ -65,20 +80,24 @@ async def avatar_command(message: discord.Message) -> str:
             await send_error(f'id {user_id} not found', message)
     return ' '.join(urls)
 
+
 @command(name='exec')
 async def exec_command(message: discord.Message) -> None:
     code = '\n'.join(message.content.split('\n')[2:])[:-3]
     if code:
         exec(code)
 
+
 @command(name='eval')
 async def eval_command(message: discord.Message) -> Any:
     return eval(' '.join(message.content.split(' ')[1:]))
+
 
 @command(name='emoji')
 async def emoji_command(message: discord.Message) -> Optional[str]:
     message_split = message.content.split(' ')
     emoji_name = message_split[1]
+
     async def send_emoji_link(emoji: discord.Emoji) -> str:
         size = '' if len(message_split) < 3 else f'?size={message_split[2]}'
         return f'{emoji.url}{size}'
@@ -94,12 +113,14 @@ async def emoji_command(message: discord.Message) -> Optional[str]:
                     return emoji['svg']
         await send_error(f'emoji {emoji_name} not found', message)
 
+
 @command(name='wrap')
 async def wrap_command(message: discord.Message) -> str:
     message_split = message.content.split(' ')
     wrap_chars = message_split[1]
     inside = ' '.join(message_split[2:])
     return f'{wrap_chars}{inside}{wrap_chars[::-1]}'
+
 
 @command(name='replace')
 async def replace_command(message: discord.Message) -> str:
@@ -114,6 +135,7 @@ async def replace_command(message: discord.Message) -> str:
         here = ' '.join(parts[3:])
     return re.sub(pattern, repl, here)
 
+
 @command(name='upload')
 async def upload_command(message: discord.Message) -> None:
     parts = message.content.split(' ')
@@ -126,15 +148,18 @@ async def upload_command(message: discord.Message) -> None:
     image = requests.get(emoji_url).content
     await guild.create_custom_emoji(name=emoji_name, image=image)
 
+
 @command(name='remind')
 async def remind_command(message: discord.Message) -> str:
     parts = message.content.split(' ')
     remind_in = timecode_convert(parts[1])
     note = ' '.join(parts[2:])
+
     async def reminder(remind_in: int, note: str) -> None:
         await asyncio.sleep(remind_in)
         await message.channel.send(f'{message.author.mention}, {note}')
     client.loop.create_task(reminder(remind_in, note))
+
 
 @command(name='weather')
 async def weather_command(message: discord.Message) -> str:
@@ -143,6 +168,7 @@ async def weather_command(message: discord.Message) -> str:
     url = cfg.weather_command_url.replace('%s', location)
     result = requests.get(url)
     return result.text
+
 
 @command(name='echo')
 async def echo_command(message: discord.Message) -> str:
@@ -155,6 +181,7 @@ async def echo_command(message: discord.Message) -> str:
     else:
         return args
 
+
 @command(name='loop')
 async def loop_command(message: discord.Message) -> None:
     parts = message.content.split(' ')
@@ -164,6 +191,7 @@ async def loop_command(message: discord.Message) -> None:
     message.content = f'{cfg.prefix}{cmd} {args}'
     for _ in range(int(times)):
         await on_message(message)
+
 
 @command(name='help')
 async def help_command(message: discord.Message) -> None:
@@ -177,3 +205,30 @@ async def help_command(message: discord.Message) -> None:
     if not help_message:
         raise KeyError(f"help for command `{cmd}` doesn't exist")
     await message.channel.send(f'{cmd}: {help_message}')
+
+
+@command(name="colorinfo")
+async def colorinfo_command(message: discord.Message) -> None:
+    messagesplit = message.content.split()
+    color_code = ' '.join(messagesplit[1:])
+    if not color_code:
+        await message.channel.send(f'{message.author.mention}, no color! usage: colorinfo <#hex or rgb>')
+        return
+    if not re.match(rgb_hex_regex, color_code):
+        await message.channel.send(f'{message.author.mention}, color: #hex or rgb, example: #f542f2 or 245, 66, 242')
+        return
+    if re.match(rgb_regex, color_code):
+        try:
+            r, g, b = [int(i.strip(',')) for i in color_code.split()]
+            color_code = rgb_to_hex(r, g, b)
+        except ValueError:
+            await message.channel.send(f'{message.author.mention}, rgb example: 245, 66, 242')
+            return
+    elif re.match(hex3_color_regex, color_code):
+        color_code = hex3_to_hex6(color_code)
+    color_img = Image.new("RGB", (100, 100), color_code)
+    with io.BytesIO() as image_binary:
+        color_img.save(image_binary, 'PNG')
+        image_binary.seek(0)
+        await message.channel.send(f'color: rgb{hex_to_rgb(color_code)}, {color_code}',
+                                   file=discord.File(fp=image_binary, filename='color.png'))

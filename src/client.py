@@ -10,7 +10,7 @@ client = discord.Client()
 
 @client.event
 async def on_ready(*args, **kwargs):
-    print('ᕕ Pepega ᕗ')
+    print('discord-selfbot is running ᕕ Pepega ᕗ')
 
 
 @client.event
@@ -24,7 +24,8 @@ async def on_message(message: discord.Message):
                 command = command.strip()
                 message.content = f'{command} {result}'.strip()
                 message_split = command.split(' ')
-                command_func = c.commands[message_split[0][len(cfg.prefix):]] if begin else c.commands[message_split[0]]
+                command_func = c.commands[message_split[0][len(
+                    cfg.prefix):]] if begin else c.commands[message_split[0]]
                 result = await command_func(message)
                 if end and result is not None:
                     await message.channel.send(result)
