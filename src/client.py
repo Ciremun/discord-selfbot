@@ -4,7 +4,7 @@ import src.commands as c
 from .log import logger
 from .utils import lookahead, send_error
 
-clients = {}
+clients = []
 
 
 class Client(discord.Client):
@@ -15,6 +15,7 @@ class Client(discord.Client):
         self.check_self = True
         for option, value in options.items():
             setattr(self, option, value)
+        clients.append(self)
 
     async def on_ready(self):
         print(
