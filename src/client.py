@@ -1,7 +1,3 @@
-import asyncio
-from queue import Queue
-from threading import Thread
-
 import discord
 
 import src.commands as c
@@ -9,31 +5,6 @@ from .log import logger
 from .utils import lookahead, send_error
 
 clients = {}
-
-class QueueThread(Thread):
-
-    def __init__(self, **kwargs) -> None:
-        Thread.__init__(self, **kwargs)
-        self.loop = None
-        self.q = Queue()
-        self.start()
-
-    def run(self) -> None:
-        while True:
-            task = self.q.get()
-            try:
-                task['func'](*task['args'], **task['kwargs'])
-            finally:
-                self.q.task_done()
-
-    def create_task(self, func, *args, **kwargs) -> None:
-        self.q.put({'func': func, 'args': args, 'kwargs': kwargs})
-
-    def run_client(self, token: str, bot: bool) -> None:
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-        self.client = Client(loop=self.loop)
-        self.client.run(token, bot=bot)
 
 
 class Client(discord.Client):
