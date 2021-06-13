@@ -1,13 +1,17 @@
 import os
+import asyncio
 from os.path import join, dirname
 
 from dotenv import load_dotenv
 
-import src.config
-import src.commands
-from src.client import client
-
+from src.client import QueueThread
 
 if __name__ == '__main__':
     load_dotenv(join(dirname(__name__), '.env'))
-    client.run(os.environ.get('DISCORD_SELFBOT_TOKEN'), bot=src.config.bot)
+    threads = []
+    for token in os.environ.get('DISCORD_SELFBOT_TOKENS').split(';'):
+        thread = QueueThread(daemon=True)
+        thread.create_task(thread.run_client, token, bot=False)
+        threads.append(thread)
+    loop = asyncio.new_event_loop()
+    loop.run_forever()

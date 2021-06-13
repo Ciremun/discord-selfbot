@@ -8,7 +8,6 @@ import requests
 from PIL import Image
 
 import src.config as cfg
-from .client import on_message
 
 from .utils import (
     send_error,
@@ -20,7 +19,6 @@ from .utils import (
     hex_to_rgb,
     rgb_to_hex
 )
-from .client import client
 
 discord_emoji_re = re.compile(r'<a?:(\w+|\d+):(\d{18})>')
 discord_avatar_size_re = re.compile(r'size=\d{1,4}$')
@@ -39,9 +37,9 @@ commands = {}
 
 def command(*, name: str) -> Callable:
     def decorator(func: Callable) -> Callable:
-        async def wrapper(message: discord.Message) -> Any:
+        async def wrapper(message: discord.Message, client: discord.Client) -> Any:
             try:
-                return await func(message)
+                return await func(message, client)
             except Exception as e:
                 await send_error(f'error: {e}', message)
         wrapper.__name__ = func.__name__
@@ -51,7 +49,7 @@ def command(*, name: str) -> Callable:
 
 
 @command(name='avatar')
-async def avatar_command(message: discord.Message) -> str:
+async def avatar_command(message: discord.Message, client: discord.Client) -> str:
     message_split = message.content.split(' ')[1:]
     size = None
     for part in message_split:
@@ -82,19 +80,19 @@ async def avatar_command(message: discord.Message) -> str:
 
 
 @command(name='exec')
-async def exec_command(message: discord.Message) -> None:
+async def exec_command(message: discord.Message, client: discord.Client) -> None:
     code = '\n'.join(message.content.split('\n')[2:])[:-3]
     if code:
         exec(code)
 
 
 @command(name='eval')
-async def eval_command(message: discord.Message) -> Any:
+async def eval_command(message: discord.Message, client: discord.Client) -> Any:
     return eval(' '.join(message.content.split(' ')[1:]))
 
 
 @command(name='emoji')
-async def emoji_command(message: discord.Message) -> Optional[str]:
+async def emoji_command(message: discord.Message, client: discord.Client) -> Optional[str]:
     message_split = message.content.split(' ')
     emoji_name = message_split[1]
 
@@ -115,7 +113,7 @@ async def emoji_command(message: discord.Message) -> Optional[str]:
 
 
 @command(name='wrap')
-async def wrap_command(message: discord.Message) -> str:
+async def wrap_command(message: discord.Message, client: discord.Client) -> str:
     message_split = message.content.split(' ')
     wrap_chars = message_split[1]
     inside = ' '.join(message_split[2:])
@@ -123,7 +121,7 @@ async def wrap_command(message: discord.Message) -> str:
 
 
 @command(name='replace')
-async def replace_command(message: discord.Message) -> str:
+async def replace_command(message: discord.Message, client: discord.Client) -> str:
     if match := re.match(replace_re, ' '.join(message.content.split(' ')[1:])):
         pattern = match.group(1)
         repl = match.group(2)
@@ -137,7 +135,7 @@ async def replace_command(message: discord.Message) -> str:
 
 
 @command(name='upload')
-async def upload_command(message: discord.Message) -> None:
+async def upload_command(message: discord.Message, client: discord.Client) -> None:
     parts = message.content.split(' ')
     guild_name = parts[1]
     guild = find_item(guild_name, client.guilds)
@@ -150,7 +148,7 @@ async def upload_command(message: discord.Message) -> None:
 
 
 @command(name='remind')
-async def remind_command(message: discord.Message) -> str:
+async def remind_command(message: discord.Message, client: discord.Client) -> str:
     parts = message.content.split(' ')
     remind_in = timecode_convert(parts[1])
     note = ' '.join(parts[2:])
@@ -162,7 +160,7 @@ async def remind_command(message: discord.Message) -> str:
 
 
 @command(name='weather')
-async def weather_command(message: discord.Message) -> str:
+async def weather_command(message: discord.Message, client: discord.Client) -> str:
     parts = message.content.split(' ')
     location = ' '.join(parts[1:])
     url = cfg.weather_command_url.replace('%s', location)
@@ -171,7 +169,7 @@ async def weather_command(message: discord.Message) -> str:
 
 
 @command(name='echo')
-async def echo_command(message: discord.Message) -> str:
+async def echo_command(message: discord.Message, client: discord.Client) -> str:
     parts = message.content.split(' ')
     args = ' '.join(parts[1:])
     if match := re.match(echo_re, args):
@@ -183,18 +181,18 @@ async def echo_command(message: discord.Message) -> str:
 
 
 @command(name='loop')
-async def loop_command(message: discord.Message) -> None:
+async def loop_command(message: discord.Message, client: discord.Client) -> None:
     parts = message.content.split(' ')
     cmd = parts[2]
     times = parts[1]
     args = ' '.join(parts[3:])
-    message.content = f'{cfg.prefix}{cmd} {args}'
+    message.content = f'{client.prefix}{cmd} {args}'
     for _ in range(int(times)):
-        await on_message(message)
+        await client.on_message(message)
 
 
 @command(name='help')
-async def help_command(message: discord.Message) -> None:
+async def help_command(message: discord.Message, client: discord.Client) -> None:
     parts = message.content.split(' ')
     try:
         cmd = parts[1]
@@ -208,7 +206,7 @@ async def help_command(message: discord.Message) -> None:
 
 
 @command(name="colorinfo")
-async def colorinfo_command(message: discord.Message) -> None:
+async def colorinfo_command(message: discord.Message, client: discord.Client) -> None:
     messagesplit = message.content.split()
     color_code = ' '.join(messagesplit[1:])
     if not color_code:
