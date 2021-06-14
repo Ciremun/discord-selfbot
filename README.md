@@ -19,7 +19,8 @@
 
 ## commands
 
-pipe `|` is supported
+pipe `|` is supported  
+eval in command string: `$$avatar $message.author.id`  
 
 |   cmd          |                  args                     |                                          description                                    |
 |----------------|-------------------------------------------|-----------------------------------------------------------------------------------------|
