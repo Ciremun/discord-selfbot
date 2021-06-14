@@ -49,5 +49,5 @@ class Client(discord.Client):
             finally:
                 try:
                     await message.delete()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.exception(e)
