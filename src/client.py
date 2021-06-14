@@ -1,3 +1,5 @@
+import re
+
 import discord
 
 import src.commands as c
@@ -5,7 +7,7 @@ from .log import logger
 from .utils import lookahead, send_error
 
 clients = []
-
+eval_re = re.compile(r'(\$[^ \$\'"\)]*)')
 
 class Client(discord.Client):
 
@@ -29,14 +31,18 @@ class Client(discord.Client):
                 begin = True
                 for command, end in lookahead(pipe):
                     command = command.strip()
+                    if begin:
+                        command = command[len(self.prefix):]
+                        begin = False
+                    if matches := re.findall(eval_re, command):
+                        for match in matches:
+                            command = command.replace(match, str(eval(match[1:])), 1)
                     message.content = f'{command} {result}'.strip()
                     message_split = command.split(' ')
-                    command_func = c.commands[message_split[0][len(
-                        self.prefix):]] if begin else c.commands[message_split[0]]
+                    command_func = c.commands[message_split[0]]
                     result = await command_func(message, self)
                     if end and result is not None:
                         await message.channel.send(result)
-                    begin = False
             except Exception as e:
                 await send_error(f'error: {e}', message)
                 logger.exception(e)
