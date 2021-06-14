@@ -49,5 +49,5 @@ class Client(discord.Client):
             finally:
                 try:
                     await message.delete()
-                except discord.errors.NotFound:
+                except Exception:
                     pass
