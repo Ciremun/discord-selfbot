@@ -186,8 +186,8 @@ async def loop_command(message: discord.Message, client: discord.Client) -> None
     cmd = parts[2]
     times = parts[1]
     args = ' '.join(parts[3:])
-    message.content = f'{client.prefix}{cmd} {args}'
     for _ in range(int(times)):
+        message.content = f'{client.prefix}{cmd} {args}'
         await client.on_message(message)
 
 
