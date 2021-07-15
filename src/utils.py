@@ -17,7 +17,8 @@ usage = {
     'echo':      '<message' + '["' + "'%s]>" + "[repl %s with] - return [formatted] message, fmt usage: 'echo " + '"hello %s world"' + "uwu' -> 'hello uwu world'",
     'loop':      '<times> <cmd name> <cmd args> - run command N times',
     'help':      '[cmd] - get commands list/usage',
-    'colorinfo': '<#hex or rgb> - get color image, rgb, hex'
+    'colorinfo': '<#hex or rgb> - get color image, rgb, hex',
+    'animate':   '[cycles=1] [frame delay=1.0] <emojis> - animate emojis with message edit'
 }
 
 
