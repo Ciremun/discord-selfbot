@@ -1,7 +1,7 @@
 import asyncio
 import re
 import io
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, List
 
 import discord
 import requests
@@ -230,3 +230,28 @@ async def colorinfo_command(message: discord.Message, client: discord.Client) ->
         image_binary.seek(0)
         await message.channel.send(f'color: rgb{hex_to_rgb(color_code)}, {color_code}',
                                    file=discord.File(fp=image_binary, filename='color.png'))
+
+@command(name="animate")
+async def animate_command(message: discord.Message, client: discord.Client) -> None:
+    if matches := re.findall(discord_emoji_re, message.content):
+        if len(matches) < 2:
+            await send_error("error: at least 2 emojis needed", message)
+            return None
+        message_parts: List[str] = message.content.split()
+        cycles = int(message_parts[1]) if message_parts[1].isdigit() else 1
+        frame_delay = 1.0
+        try:
+            frame_delay = float(message_parts[2])
+        except Exception:
+            pass
+        for _ in range(cycles):
+            for match in matches:
+                emoji = client.get_emoji(int(match[1]))
+                if emoji is None:
+                    await send_error(f"error: couldn't get emoji '{match[0]}'")
+                    return None
+                await message.edit(content=emoji)
+                await asyncio.sleep(frame_delay)
+        return None
+    await send_error("error: no emojis provided", message)
+    return None
