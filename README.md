@@ -38,3 +38,4 @@ eval in command string: `$$avatar $message.author.id`
 | `help`         | `[cmd]`                                   | get commands list/usage                                                                 |
 | `colorinfo`    | `<#hex or rgb>`                           | get color image, rgb, hex                                                               |
 | `animate`      | `[cycles=1] [frame delay=1.0] <emojis>`   | animate emojis with message edit                                                        |
+| `showcmd`      | `<command>`                               | get command source code                                                                 |

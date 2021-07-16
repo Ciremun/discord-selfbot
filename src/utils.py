@@ -18,7 +18,8 @@ usage = {
     'loop':      '<times> <cmd name> <cmd args> - run command N times',
     'help':      '[cmd] - get commands list/usage',
     'colorinfo': '<#hex or rgb> - get color image, rgb, hex',
-    'animate':   '[cycles=1] [frame delay=1.0] <emojis> - animate emojis with message edit'
+    'animate':   '[cycles=1] [frame delay=1.0] <emojis> - animate emojis with message edit',
+    'showcmd':   '<command> - get command source code'
 }
 
 
