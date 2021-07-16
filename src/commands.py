@@ -1,6 +1,8 @@
 import asyncio
 import re
 import io
+import inspect
+from functools import wraps
 from typing import Optional, Callable, Any, List
 
 import discord
@@ -37,12 +39,12 @@ commands = {}
 
 def command(*, name: str) -> Callable:
     def decorator(func: Callable) -> Callable:
+        @wraps(func)
         async def wrapper(message: discord.Message, client: discord.Client) -> Any:
             try:
                 return await func(message, client)
             except Exception as e:
                 await send_error(f'error: {e}', message)
-        wrapper.__name__ = func.__name__
         commands[name] = wrapper
         return wrapper
     return decorator
@@ -231,6 +233,7 @@ async def colorinfo_command(message: discord.Message, client: discord.Client) ->
         await message.channel.send(f'color: rgb{hex_to_rgb(color_code)}, {color_code}',
                                    file=discord.File(fp=image_binary, filename='color.png'))
 
+
 @command(name="animate")
 async def animate_command(message: discord.Message, client: discord.Client) -> None:
     if matches := re.findall(discord_emoji_re, message.content):
@@ -255,3 +258,16 @@ async def animate_command(message: discord.Message, client: discord.Client) -> N
         return None
     await send_error("error: no emojis provided", message)
     return None
+
+@command(name="showcmd")
+async def showcmd_command(message: discord.Message, client: discord.Client) -> Optional[str]:
+    message_parts = message.content.split()
+    try:
+        cmd = commands.get(message_parts[1], None)
+        if cmd is None:
+            await send_error(f"error: command '{message_parts[1]}' was not found", message)
+            return None
+    except IndexError:
+        await send_error("error: no command provided", message)
+        return None
+    return f'```python\n{inspect.getsource(cmd)}```'
