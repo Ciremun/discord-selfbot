@@ -12,7 +12,7 @@ class Client(discord.Client):
 
     def __init__(self, **options) -> None:
         super().__init__()
-        self.prefix = '?'
+        self.prefix = '$$'
         self.check_self = True
         for option, value in options.items():
             setattr(self, option, value)
