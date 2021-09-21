@@ -6,13 +6,13 @@ import src.commands as c
 from .utils import lookahead, send_error
 
 clients = []
-eval_re = re.compile(r'(\$[^ \$\'"\)]*)')
+eval_re = re.compile(r'(\\?\$[^ \$\'"\)]*)')
 
 class Client(discord.Client):
 
     def __init__(self, **options) -> None:
         super().__init__()
-        self.prefix = '$$'
+        self.prefix = '?'
         self.check_self = True
         for option, value in options.items():
             setattr(self, option, value)
@@ -33,8 +33,15 @@ class Client(discord.Client):
                     if begin:
                         command = command[len(self.prefix):]
                         begin = False
-                    if matches := re.findall(eval_re, command):
-                        for match in matches:
+                    if matches := re.finditer(eval_re, command):
+                        offset = 0
+                        for m in matches:
+                            match = m.group(0)
+                            if match[0] == '\\':
+                                s = m.start() - offset
+                                command = command[:s] + command[1 + s:]
+                                offset += 1
+                                continue
                             command = command.replace(match, str(eval(match[1:])), 1)
                     message.content = f'{command} {result}'.strip()
                     message_split = command.split(' ')
