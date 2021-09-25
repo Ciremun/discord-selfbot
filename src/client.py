@@ -15,7 +15,7 @@ class Client(discord.Client):
         super().__init__()
         self.prefix = '$$'
         self.check_self = True
-        self.convert_emoji_names_to_link = True
+        self.convert_emoji_names_to_links = True
         for option, value in options.items():
             setattr(self, option, value)
         clients.append(self)
@@ -60,7 +60,7 @@ class Client(discord.Client):
                         await message.delete()
                     except Exception:
                         pass
-            elif self.convert_emoji_names_to_link:
+            elif self.convert_emoji_names_to_links:
                 try:
                     message_split = message.content.split(' ')
                     links = []
