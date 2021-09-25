@@ -271,3 +271,13 @@ async def showcmd_command(message: discord.Message, client: discord.Client) -> O
         await send_error("error: no command provided", message)
         return None
     return f'```python\n{inspect.getsource(cmd)}```'
+
+@command(name="cfg")
+async def cfg_command(message: discord.Message, client: discord.Client) -> Optional[str]:
+    message_parts = message.content.split()
+    target = message_parts[1]
+    try:
+        value = eval(message_parts[2])
+        setattr(client, target, value)
+    except IndexError:
+        return str(getattr(client, target))
