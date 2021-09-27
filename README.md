@@ -17,10 +17,11 @@
 | `prefix`      | `str`  | bot command prefix             |
 | `check_self`  | `bool` | can other users run commands?  |
 
-## commands
+## commands & misc
 
 pipe `|` is supported  
 eval in command string: `$$avatar $message.author.id`  
+emoji names are converted to links by default
 
 |   cmd          |                  args                     |                                          description                                    |
 |----------------|-------------------------------------------|-----------------------------------------------------------------------------------------|
@@ -39,3 +40,4 @@ eval in command string: `$$avatar $message.author.id`
 | `colorinfo`    | `<#hex or rgb>`                           | get color image, rgb, hex                                                               |
 | `animate`      | `[cycles=1] [frame delay=1.0] <emojis>`   | animate emojis with message edit                                                        |
 | `showcmd`      | `<command>`                               | get command source code                                                                 |
+| `cfg`          | `<attr> [value]`                          | get / set Client class attribute                                                        |
