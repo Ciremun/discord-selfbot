@@ -12,10 +12,11 @@
 
 ### Client class options
 
-|     Var       |  Type  |          Description           |
-|---------------|--------|--------------------------------|
-| `prefix`      | `str`  | bot command prefix             |
-| `check_self`  | `bool` | can other users run commands?  |
+|     Var                         |  Type  |          Description           |
+|---------------------------------|--------|--------------------------------|
+| `prefix`                        | `str`  | bot command prefix             |
+| `check_self`                    | `bool` | can other users run commands?  |
+| `convert_emoji_names_to_links`  | `bool` | convert emoji names to links?  |
 
 ## commands & misc
 
