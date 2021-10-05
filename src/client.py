@@ -8,7 +8,6 @@ from .utils import lookahead, send_error
 clients = []
 eval_re = re.compile(r'(\\?\$[^ \$]*)')
 
-
 class Client(discord.Client):
 
     def __init__(self, **options) -> None:

@@ -1,6 +1,7 @@
 import asyncio
 import re
 import io
+import os
 import inspect
 from functools import wraps
 from typing import Optional, Callable, Any, List
@@ -8,8 +9,6 @@ from typing import Optional, Callable, Any, List
 import discord
 import requests
 from PIL import Image
-
-import src.config as cfg
 
 from .utils import (
     send_error,
@@ -34,6 +33,7 @@ hex3_color_regex = re.compile(r'^#([A-Fa-f0-9]{3})$')
 rgb_regex = re.compile(r'^(?:(?:^|,?\s*)([01]?\d\d?|2[0-4]\d|25[0-5])){3}$')
 rgb_hex_regex = re.compile(
     r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^(?:(?:^|,?\s*)([01]?\d\d?|2[0-4]\d|25[0-5])){3}$')
+bttv_token = os.environ.get('BTTV_TOKEN')
 commands = {}
 
 
@@ -165,7 +165,7 @@ async def remind_command(message: discord.Message, client: discord.Client) -> st
 async def weather_command(message: discord.Message, client: discord.Client) -> str:
     parts = message.content.split(' ')
     location = ' '.join(parts[1:])
-    url = cfg.weather_command_url.replace('%s', location)
+    url = 'https://wttr.in/%s?format=4'.replace('%s', location)
     result = requests.get(url)
     return result.text
 
@@ -281,3 +281,17 @@ async def cfg_command(message: discord.Message, client: discord.Client) -> Optio
         setattr(client, target, value)
     except IndexError:
         return str(getattr(client, target))
+
+@command(name="bttv")
+async def bttv_command(message: discord.Message, client: discord.Client) -> Optional[str]:
+    message_parts = message.content.split()
+    query = message_parts[1]
+    response = requests.get(f'https://api.betterttv.net/3/emotes/shared/search?query={query}&offset=0&limit=1', headers={
+        'authorization': f'Bearer {bttv_token}'
+    })
+    if response.status_code == 200:
+        size = message_parts[2] if len(message_parts) == 3 else '2x'
+        response_json = response.json()
+        return f'https://cdn.betterttv.net/emote/{response_json[0]["id"]}/{size}'
+    else:
+        send_error(f'{response.status_code}: {response.text}', message)

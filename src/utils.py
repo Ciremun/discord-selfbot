@@ -20,7 +20,8 @@ usage = {
     'colorinfo': '<#hex or rgb> - get color image, rgb, hex',
     'animate':   '[cycles=1] [frame delay=1.0] <emojis> - animate emojis with message edit',
     'showcmd':   '<command> - get command source code',
-    'cfg':	     '<attr> [value] - get / set Client class attribute'
+    'cfg':	     '<attr> [value] - get / set Client class attribute',
+    'bttv':      '<query> [size: any(1x, 2x, 3x)] - get emote url from bttv search'
 }
 
 
