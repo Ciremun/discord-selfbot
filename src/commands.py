@@ -283,7 +283,7 @@ async def cfg_command(message: discord.Message, client: discord.Client) -> Optio
         return str(getattr(client, target))
 
 @command(name="bttv")
-async def bttv_command(message: discord.Message, client: discord.Client) -> Optional[str]:
+async def bttv_command(message: discord.Message, client: discord.Client) -> None:
     message_parts = message.content.split()
     query = message_parts[1]
     response = requests.get(f'https://api.betterttv.net/3/emotes/shared/search?query={query}&offset=0&limit=1', headers={
@@ -294,9 +294,9 @@ async def bttv_command(message: discord.Message, client: discord.Client) -> Opti
         response_json = response.json()
         response = requests.get(f'https://cdn.betterttv.net/emote/{response_json[0]["id"]}/{size}')
         if response.status_code == 200:
-            image = Image.open(io.BytesIO(response.content))
+            bytes_io = io.BytesIO(response.content)
+            image = Image.open(bytes_io)
             fmt = image.format or 'PNG'
             filename = response_json[0].get("code") or 'emote'
-            new_message = await message.channel.send(file=discord.File(fp=io.BytesIO(image.tobytes()), filename=f'{filename}.{fmt.lower()}'))
-            return new_message.content
+            await message.channel.send(file=discord.File(bytes_io, filename=f'{filename}.{fmt.lower()}'))
     send_error(f'{response.status_code}: {response.text}', message)
