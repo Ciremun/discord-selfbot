@@ -298,6 +298,7 @@ async def bttv_command(message: discord.Message, client: discord.Client) -> None
             fmt = str(image.format) or 'PNG'
             with io.BytesIO() as output:
                 image.save(output, format=fmt)
+                output.seek(0)
                 filename = response_json[0].get("code") or 'emote'
                 await message.channel.send(file=discord.File(output, filename=f'{filename}.{fmt.lower()}'))
             return
