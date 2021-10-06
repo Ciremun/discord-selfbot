@@ -24,7 +24,8 @@ class Client(discord.Client):
             f'discord-selfbot [{self.user.name}#{self.user.discriminator}] is running ᕕ Pepega ᕗ')
 
     async def on_message_edit(self, before: discord.Message, after: discord.Message) -> None:
-        await self.on_message(after)
+        if after.content.startswith(self.prefix):
+            await self.on_message(after)
 
     async def on_message(self, message: discord.Message) -> None:
         if (not self.check_self or message.author.id == self.user.id):
