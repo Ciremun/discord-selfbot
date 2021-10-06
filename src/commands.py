@@ -295,12 +295,8 @@ async def bttv_command(message: discord.Message, client: discord.Client) -> Opti
         response = requests.get(f'https://cdn.betterttv.net/emote/{response_json[0]["id"]}/{size}')
         if response.status_code == 200:
             image = Image.open(io.BytesIO(response.content))
-            with io.BytesIO() as image_binary:
-                fmt = image.format or 'PNG'
-                print(f'{fmt=}')
-                image.save(image_binary, fmt)
-                image_binary.seek(0)
-                filename = response_json[0].get("code") or 'emote'
-                new_message = await message.channel.send(file=discord.File(fp=image_binary, filename=f'{filename}.{fmt.lower()}'))
-                return new_message.content
+            fmt = image.format or 'PNG'
+            filename = response_json[0].get("code") or 'emote'
+            new_message = await message.channel.send(file=discord.File(fp=io.BytesIO(image.tobytes()), filename=f'{filename}.{fmt.lower()}'))
+            return new_message.content
     send_error(f'{response.status_code}: {response.text}', message)
