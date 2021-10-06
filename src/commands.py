@@ -297,9 +297,10 @@ async def bttv_command(message: discord.Message, client: discord.Client) -> Opti
             image = Image.open(io.BytesIO(response.content))
             with io.BytesIO() as image_binary:
                 fmt = image.format or 'PNG'
+                print(f'{fmt=}')
                 image.save(image_binary, fmt)
                 image_binary.seek(0)
-                filename = response_json[0].get("code") or f'emote.{fmt.lower()}'
-                new_message = await message.channel.send(file=discord.File(fp=image_binary, filename=filename))
+                filename = response_json[0].get("code") or 'emote'
+                new_message = await message.channel.send(file=discord.File(fp=image_binary, filename=f'{filename}.{fmt.lower()}'))
                 return new_message.content
     send_error(f'{response.status_code}: {response.text}', message)
