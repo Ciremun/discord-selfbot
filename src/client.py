@@ -20,7 +20,7 @@ class Client(discord.Client):
         clients.append(self)
 
     async def on_ready(self) -> None:
-        await self.change_presence(status=discord.Status.idle)
+        await self.change_presence(status=discord.Status.idle, afk=True)
         print(
             f'discord-selfbot [{self.user.name}#{self.user.discriminator}] is running ᕕ Pepega ᕗ')
 
