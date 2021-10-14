@@ -298,7 +298,6 @@ async def bttv_command(message: discord.Message, client: discord.Client) -> None
             fmt = str(image.format) or 'PNG'
             with io.BytesIO() as output:
                 if fmt == 'GIF':
-                    print('save as gif')
                     image.save(output, format=fmt, save_all=True, duration=image.n_frames, loop=0, disposal=2, transparency=255)
                 else:
                     image.save(output, format=fmt)
