@@ -4,7 +4,7 @@ import io
 import os
 import inspect
 from functools import wraps
-from typing import Optional, Callable, Any, List
+from typing import Dict, Optional, Callable, Any, List
 
 import discord
 import requests
@@ -34,6 +34,7 @@ rgb_regex = re.compile(r'^(?:(?:^|,?\s*)([01]?\d\d?|2[0-4]\d|25[0-5])){3}$')
 rgb_hex_regex = re.compile(
     r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^(?:(?:^|,?\s*)([01]?\d\d?|2[0-4]\d|25[0-5])){3}$')
 bttv_token = os.environ.get('BTTV_TOKEN')
+bttv_global_emotes = None
 commands = {}
 
 
@@ -259,6 +260,7 @@ async def animate_command(message: discord.Message, client: discord.Client) -> N
     await send_error("error: no emojis provided", message)
     return None
 
+
 @command(name="showcmd")
 async def showcmd_command(message: discord.Message, client: discord.Client) -> Optional[str]:
     message_parts = message.content.split()
@@ -272,6 +274,7 @@ async def showcmd_command(message: discord.Message, client: discord.Client) -> O
         return None
     return f'```python\n{inspect.getsource(cmd)}```'
 
+
 @command(name="cfg")
 async def cfg_command(message: discord.Message, client: discord.Client) -> Optional[str]:
     message_parts = message.content.split()
@@ -282,27 +285,68 @@ async def cfg_command(message: discord.Message, client: discord.Client) -> Optio
     except IndexError:
         return str(getattr(client, target))
 
+
 @command(name="bttv")
 async def bttv_command(message: discord.Message, client: discord.Client) -> None:
+    global bttv_global_emotes
     message_parts = message.content.split()
     query = message_parts[1]
+
+    async def send_image_from_bytes(content: bytes, filename: str) -> None:
+        image = Image.open(io.BytesIO(content))
+        fmt = str(image.format) or 'PNG'
+        with io.BytesIO() as output:
+            if fmt == 'GIF':
+                image.save(output, format=fmt, save_all=True,
+                           duration=image.n_frames, loop=0, disposal=2, transparency=255)
+            else:
+                image.save(output, format=fmt)
+            output.seek(0)
+            await message.channel.send(file=discord.File(output, filename=f'{filename}.{fmt.lower()}'))
+
+    def find_emote_in_bttv_globals(emote_name: str, globals_: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        for emote in globals_:
+            code = emote.get('code')
+            if not isinstance(code, str):
+                return None
+            if code == emote_name:
+                return emote
+        return None
+
+    emote = None
+    if bttv_global_emotes is None:
+        response = requests.get(
+            'https://api.betterttv.net/3/cached/emotes/global')
+        if response.status_code == 200:
+            bttv_global_emotes = response.json()
+            emote = find_emote_in_bttv_globals(query, bttv_global_emotes)
+        else:
+            await send_error(f'{response.status_code}: {response.text}', message)
+    else:
+        emote = find_emote_in_bttv_globals(query, bttv_global_emotes)
+
+    if emote is not None:
+        size = message_parts[2] if len(message_parts) == 3 else '2x'
+        emote_id = emote.get('id')
+        response = requests.get(
+            f'https://cdn.betterttv.net/emote/{emote_id}/{size}')
+        if response.status_code == 200:
+            filename = emote.get("code") or 'emote'
+            await send_image_from_bytes(response.content, filename)
+            return
+        else:
+            await send_error(f'{response.status_code}: {response.text}', message)
+
     response = requests.get(f'https://api.betterttv.net/3/emotes/shared/search?query={query}&offset=0&limit=1', headers={
         'authorization': f'Bearer {bttv_token}'
     })
     if response.status_code == 200:
         size = message_parts[2] if len(message_parts) == 3 else '2x'
         response_json = response.json()
-        response = requests.get(f'https://cdn.betterttv.net/emote/{response_json[0]["id"]}/{size}')
+        response = requests.get(
+            f'https://cdn.betterttv.net/emote/{response_json[0]["id"]}/{size}')
         if response.status_code == 200:
-            image = Image.open(io.BytesIO(response.content))
-            fmt = str(image.format) or 'PNG'
-            with io.BytesIO() as output:
-                if fmt == 'GIF':
-                    image.save(output, format=fmt, save_all=True, duration=image.n_frames, loop=0, disposal=2, transparency=255)
-                else:
-                    image.save(output, format=fmt)
-                output.seek(0)
-                filename = response_json[0].get("code") or 'emote'
-                await message.channel.send(file=discord.File(output, filename=f'{filename}.{fmt.lower()}'))
+            filename = response_json[0].get("code") or 'emote'
+            await send_image_from_bytes(response.content, filename)
             return
     await send_error(f'{response.status_code}: {response.text}', message)
